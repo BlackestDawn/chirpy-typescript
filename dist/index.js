@@ -8,11 +8,11 @@ const PORT = 8080;
 // basics
 app.use(middlewareLogResponses);
 // metrics routes
-app.get("/metrics", handlerMetrics);
-app.get("/reset", handlerMetricsReset);
+app.get("/admin/metrics", handlerMetrics);
+app.get("/admin/reset", handlerMetricsReset);
 // static files & health check
 app.use("/app", middlewareMetricsInc, express.static("./site"));
-app.get("/healthz", handlerReadiness);
+app.get("/api/healthz", handlerReadiness);
 // start server
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);

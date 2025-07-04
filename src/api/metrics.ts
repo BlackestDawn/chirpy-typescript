@@ -8,8 +8,13 @@ export async function middlewareMetricsInc(req: Request, res: Response, next: an
 }
 
 export async function handlerMetrics(req: Request, res: Response) {
-  res.set("Content-Type", "text/plain; charset=utf-8");
-  res.status(200).send(`Hits: ${appState.fileserverHits}`);
+  res.set("Content-Type", "text/html; charset=utf-8");
+  res.status(200).send(`<html>
+  <body>
+    <h1>Welcome, Chirpy Admin</h1>
+    <p>Chirpy has been visited ${appState.fileserverHits} times!</p>
+  </body>
+</html>`);
   res.end();
 }
 
