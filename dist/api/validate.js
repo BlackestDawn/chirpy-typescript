@@ -1,13 +1,13 @@
-import { respondWithError, respondWithJSON } from "./json.js";
+import * as errors from "./errors.js";
+import { respondWithJSON } from "./json.js";
 export async function handlerValidateChirp(req, res) {
+    const maxLength = 140;
     const chirp = req.body;
     if (!chirp || !chirp.body) {
-        respondWithError(res, 400, "Something went wrong");
-        return;
+        throw new Error("Something went wrong");
     }
-    if (chirp.body.length > 140) {
-        respondWithError(res, 400, "Chirp is too long");
-        return;
+    if (chirp.body.length > maxLength) {
+        throw new errors.BadRequestError(`Chirp is too long. Max length is ${maxLength}`);
     }
     const badWords = ["kerfuffle", "sharbert", "fornax"];
     respondWithJSON(res, 200, {

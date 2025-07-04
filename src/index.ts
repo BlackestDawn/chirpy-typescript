@@ -1,7 +1,7 @@
 import express from "express";
 import { handlerReadiness } from "./api/health.js";
-import { middlewareLogResponses } from "./api/status.js";
-import { handlerMetrics, handlerMetricsReset, middlewareMetricsInc } from "./api/metrics.js";
+import { middlewareLogResponses, middlewareMetricsInc, middlewareError } from "./api/middleware.js";
+import { handlerMetrics, handlerMetricsReset } from "./api/metrics.js";
 import { handlerValidateChirp } from "./api/validate.js";
 
 
@@ -21,7 +21,12 @@ app.use("/app", middlewareMetricsInc, express.static("./site"));
 app.get("/api/healthz", handlerReadiness)
 
 // Validation
-app.post("/api/validate_chirp", express.json(), handlerValidateChirp);
+app.post("/api/validate_chirp", express.json(), (req, res, next) => {
+  Promise.resolve(handlerValidateChirp(req, res)).catch(next);
+});
+
+// Errors
+app.use(middlewareError);
 
 // start server
 app.listen(PORT, () => {

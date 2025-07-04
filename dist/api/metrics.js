@@ -1,8 +1,4 @@
 import { appState } from "../config.js";
-export async function middlewareMetricsInc(req, res, next) {
-    appState.fileserverHits++;
-    next();
-}
 export async function handlerMetrics(req, res) {
     res.set("Content-Type", "text/html; charset=utf-8");
     res.status(200).send(`<html>
