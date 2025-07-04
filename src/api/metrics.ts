@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { appState } from "../config.js";
+import { resetUsers } from "../db/queries/users.js";
+import * as errors from "./errors.js";
 
 
 export async function handlerMetrics(req: Request, res: Response) {
@@ -14,7 +16,13 @@ export async function handlerMetrics(req: Request, res: Response) {
 }
 
 export async function handlerMetricsReset(req: Request, res: Response) {
+  if (appState.platform !== "dev") {
+    throw new errors.ForbiddenError("Not allowed in this environment.");
+  }
+
   appState.fileserverHits = 0;
+  await resetUsers();
+
   res.set("Content-Type", "text/plain; charset=utf-8");
   res.status(200).send("Hits reset");
   res.end();
