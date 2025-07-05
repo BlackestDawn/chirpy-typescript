@@ -7,6 +7,10 @@ type APIConfig = {
   fileserverHits: number;
   platform: string
   db: DBConfig;
+  jwt: {
+    secret: string;
+    defaultExpireTime: number;
+  };
 };
 
 type DBConfig = {
@@ -24,7 +28,11 @@ export const appState: APIConfig = {
   db: {
     url: envOrThrow("DB_URL"),
     migrations: migrationConfig
-  }
+  },
+  jwt: {
+    secret: envOrThrow("JWT_SECRET"),
+    defaultExpireTime: 60 * 60,
+  },
 };
 
 function envOrThrow(key: string): string {

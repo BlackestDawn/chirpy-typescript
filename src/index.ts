@@ -6,8 +6,9 @@ import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { appState } from "./config.js";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { handlerAddUser } from "./api/users.js";
+import { handlerAddUser, handlerLoginUser } from "./api/users.js";
 import { handlerNewChirp, handlerGetChirps, handlerGetChirp } from "./api/chirps.js";
+import { handlerRefreshAccessToken, handlerRevokeRefreshToken } from "./api/auth.js";
 
 
 // DB migration
@@ -34,6 +35,9 @@ app.get("/api/healthz", handlerReadiness)
 app.post("/api/users", (req,res, next) => {
   Promise.resolve(handlerAddUser(req, res)).catch(next);
 });
+app.post("/api/login", (req,res, next) => {
+  Promise.resolve(handlerLoginUser(req, res)).catch(next);
+});
 
 // Chirps
 app.post("/api/chirps", (req,res, next) => {
@@ -44,6 +48,14 @@ app.get("/api/chirps", (_, res, next) => {
 });
 app.get("/api/chirps/:chirpID", (req, res, next) => {
   Promise.resolve(handlerGetChirp(req, res)).catch(next)
+});
+
+// Tokens
+app.post("/api/refresh", (req,res, next) => {
+  Promise.resolve(handlerRefreshAccessToken(req, res)).catch(next);
+});
+app.post("/api/revoke", (req,res, next) => {
+  Promise.resolve(handlerRevokeRefreshToken(req, res)).catch(next);
 });
 
 // Errors

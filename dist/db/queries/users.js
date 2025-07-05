@@ -16,3 +16,8 @@ export async function getUserByUUID(id) {
         where: (users, { eq }) => eq(users.id, id),
     });
 }
+export async function getUserByEmail(email) {
+    return await db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.email, email),
+    });
+}

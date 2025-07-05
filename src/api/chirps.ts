@@ -2,8 +2,10 @@ import { Request, Response } from "express";
 import { respondWithJSON } from "./json.js";
 import { createChirp, getAllChirps, getChirp } from "../db/queries/chirps.js";
 import { getUserByUUID } from "../db/queries/users.js";
-import { NewChirp } from "../db/schema.js";
+import { NewChirp, Chirp } from "../db/schema.js";
 import  * as errors from "./errors.js";
+import { appState } from "../config.js";
+import { getBearerToken, validateJWT } from "../lib/auth.js";
 
 
 function validateChirp(message: string) {
@@ -18,6 +20,13 @@ function validateChirp(message: string) {
   return message.split(" ").map((word: string) => badWords.includes(word.toLowerCase()) ? "****" : word).join(" ")
 }
 
+async function validateUser(req: Request) {
+  const token = await getBearerToken(req);
+  const userID = validateJWT(token, appState.jwt.secret);
+  return userID;
+}
+
+
 export async function handlerNewChirp(req: Request, res: Response) {
   const chirp: NewChirp = req.body;
 
@@ -25,6 +34,7 @@ export async function handlerNewChirp(req: Request, res: Response) {
     throw new errors.BadRequestError("no message body found");
   }
   chirp.body = validateChirp(chirp.body);
+  chirp.userId = await validateUser(req);
 
   if (!chirp.userId) {
     throw new errors.BadRequestError("no user id found");
@@ -36,7 +46,7 @@ export async function handlerNewChirp(req: Request, res: Response) {
     throw new errors.NotFoundError("user not found");
   }
 
-  const createdChirp = await createChirp(chirp);
+  const createdChirp = await createChirp(chirp satisfies NewChirp);
 
   respondWithJSON(res, 201, createdChirp);
 }
@@ -54,5 +64,5 @@ export async function handlerGetChirp(req: Request, res: Response) {
     throw new errors.NotFoundError("chirp not found");
   }
 
-  respondWithJSON(res, 200, chirp);
+  respondWithJSON(res, 200, chirp satisfies Chirp);
 }

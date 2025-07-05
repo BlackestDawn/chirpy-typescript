@@ -2,6 +2,8 @@ import { respondWithJSON } from "./json.js";
 import { createChirp, getAllChirps, getChirp } from "../db/queries/chirps.js";
 import { getUserByUUID } from "../db/queries/users.js";
 import * as errors from "./errors.js";
+import { appState } from "../config.js";
+import { getBearerToken, validateJWT } from "../lib/auth.js";
 function validateChirp(message) {
     const maxLength = 140;
     if (message.length > maxLength) {
@@ -10,12 +12,18 @@ function validateChirp(message) {
     const badWords = ["kerfuffle", "sharbert", "fornax"];
     return message.split(" ").map((word) => badWords.includes(word.toLowerCase()) ? "****" : word).join(" ");
 }
+async function validateUser(req) {
+    const token = await getBearerToken(req);
+    const userID = validateJWT(token, appState.jwt.secret);
+    return userID;
+}
 export async function handlerNewChirp(req, res) {
     const chirp = req.body;
     if (!chirp || !chirp.body) {
         throw new errors.BadRequestError("no message body found");
     }
     chirp.body = validateChirp(chirp.body);
+    chirp.userId = await validateUser(req);
     if (!chirp.userId) {
         throw new errors.BadRequestError("no user id found");
     }

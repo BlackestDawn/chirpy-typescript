@@ -15,6 +15,27 @@
       "when": 1751650221302,
       "tag": "0001_tough_ken_ellis",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1751694363649,
+      "tag": "0002_naive_mattie_franklin",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1751715031457,
+      "tag": "0003_previous_scalphunter",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1751734919333,
+      "tag": "0004_cool_valeria_richards",
+      "breakpoints": true
     }
   ]
 }

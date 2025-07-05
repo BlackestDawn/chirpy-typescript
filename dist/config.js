@@ -8,7 +8,11 @@ export const appState = {
     db: {
         url: envOrThrow("DB_URL"),
         migrations: migrationConfig
-    }
+    },
+    jwt: {
+        secret: envOrThrow("JWT_SECRET"),
+        defaultExpireTime: 60 * 60,
+    },
 };
 function envOrThrow(key) {
     if (!process.env[key]) {
