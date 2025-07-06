@@ -6,8 +6,8 @@ import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { appState } from "./config.js";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { handlerAddUser, handlerLoginUser } from "./api/users.js";
-import { handlerNewChirp, handlerGetChirps, handlerGetChirp } from "./api/chirps.js";
+import { handlerAddUser, handlerLoginUser, handlerUpdateUsers } from "./api/users.js";
+import { handlerNewChirp, handlerGetChirps, handlerGetChirp, handlerDeleteChirp } from "./api/chirps.js";
 import { handlerRefreshAccessToken, handlerRevokeRefreshToken } from "./api/auth.js";
 
 
@@ -38,6 +38,9 @@ app.post("/api/users", (req,res, next) => {
 app.post("/api/login", (req,res, next) => {
   Promise.resolve(handlerLoginUser(req, res)).catch(next);
 });
+app.put("/api/users", (req,res, next) => {
+  Promise.resolve(handlerUpdateUsers(req, res)).catch(next);
+});
 
 // Chirps
 app.post("/api/chirps", (req,res, next) => {
@@ -48,6 +51,9 @@ app.get("/api/chirps", (_, res, next) => {
 });
 app.get("/api/chirps/:chirpID", (req, res, next) => {
   Promise.resolve(handlerGetChirp(req, res)).catch(next)
+});
+app.delete("/api/chirps/:chirpID", (req, res, next) => {
+  Promise.resolve(handlerDeleteChirp(req, res)).catch(next)
 });
 
 // Tokens

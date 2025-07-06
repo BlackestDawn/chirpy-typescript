@@ -53,14 +53,14 @@ export async function validateJWT(tokenString: string, secret: string) {
 export async function getBearerToken(req: Request) {
   const authHeader = req.header("Authorization");
   if (!authHeader) {
-    throw new Error("Missing Authorization header");
+    throw new errors.UnauthorizedError("Missing Authorization header");
   }
   if (!authHeader.startsWith("Bearer ")) {
-    throw new Error("Missing Bearer token");
+    throw new errors.UnauthorizedError("Missing Bearer token");
   }
   const [bearer, token] = authHeader.split(" ");
   if (!bearer || !token) {
-    throw new Error("Missing Bearer token");
+    throw new errors.UnauthorizedError("Missing Bearer token");
   }
   return token;
 }

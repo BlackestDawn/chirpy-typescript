@@ -1,5 +1,5 @@
 import { respondWithJSON } from "./json.js";
-import { createChirp, getAllChirps, getChirp } from "../db/queries/chirps.js";
+import { createChirp, getAllChirps, getChirp, deleteChirp } from "../db/queries/chirps.js";
 import { getUserByUUID } from "../db/queries/users.js";
 import * as errors from "./errors.js";
 import { appState } from "../config.js";
@@ -44,4 +44,20 @@ export async function handlerGetChirp(req, res) {
         throw new errors.NotFoundError("chirp not found");
     }
     respondWithJSON(res, 200, chirp);
+}
+export async function handlerDeleteChirp(req, res) {
+    const chirp = await getChirp(req.params.chirpID);
+    if (!chirp) {
+        throw new errors.NotFoundError("chirp not found");
+    }
+    const token = await getBearerToken(req);
+    const userID = await validateJWT(token, appState.jwt.secret);
+    if (userID !== chirp.userId) {
+        throw new errors.ForbiddenError("you are not authorized to delete this chirp");
+    }
+    const result = await deleteChirp(chirp.id);
+    if (!result) {
+        throw new Error("something went wrong deleting the chirp");
+    }
+    respondWithJSON(res, 204, "");
 }

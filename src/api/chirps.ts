@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { respondWithJSON } from "./json.js";
-import { createChirp, getAllChirps, getChirp } from "../db/queries/chirps.js";
+import { createChirp, getAllChirps, getChirp, deleteChirp } from "../db/queries/chirps.js";
 import { getUserByUUID } from "../db/queries/users.js";
 import { NewChirp, Chirp } from "../db/schema.js";
 import  * as errors from "./errors.js";
@@ -65,4 +65,24 @@ export async function handlerGetChirp(req: Request, res: Response) {
   }
 
   respondWithJSON(res, 200, chirp satisfies Chirp);
+}
+
+export async function handlerDeleteChirp(req: Request, res: Response) {
+  const chirp = await getChirp(req.params.chirpID);
+  if (!chirp) {
+    throw new errors.NotFoundError("chirp not found");
+  }
+
+  const token = await getBearerToken(req);
+  const userID = await validateJWT(token, appState.jwt.secret);
+  if (userID !== chirp.userId) {
+    throw new errors.ForbiddenError("you are not authorized to delete this chirp");
+  }
+
+  const result = await deleteChirp(chirp.id);
+  if (!result) {
+    throw new Error("something went wrong deleting the chirp");
+  }
+
+  respondWithJSON(res, 204, "");
 }

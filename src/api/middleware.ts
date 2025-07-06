@@ -24,15 +24,14 @@ export async function middlewareError(err: Error, req: Request, res: Response, n
 
   if (err instanceof errors.BadRequestError) {
     errCode = 400;
-    errMessage = err.message;
   } else if (err instanceof errors.UnauthorizedError) {
     errCode = 401;
-    errMessage = err.message;
   } else if (err instanceof errors.ForbiddenError) {
     errCode = 403;
-    errMessage = err.message;
   } else if (err instanceof errors.NotFoundError) {
     errCode = 404;
+  }
+  if (err.message) {
     errMessage = err.message;
   }
 

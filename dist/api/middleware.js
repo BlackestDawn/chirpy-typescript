@@ -18,18 +18,17 @@ export async function middlewareError(err, req, res, next) {
     let errMessage = "Something went wrong on our end";
     if (err instanceof errors.BadRequestError) {
         errCode = 400;
-        errMessage = err.message;
     }
     else if (err instanceof errors.UnauthorizedError) {
         errCode = 401;
-        errMessage = err.message;
     }
     else if (err instanceof errors.ForbiddenError) {
         errCode = 403;
-        errMessage = err.message;
     }
     else if (err instanceof errors.NotFoundError) {
         errCode = 404;
+    }
+    if (err.message) {
         errMessage = err.message;
     }
     respondWithError(res, errCode, errMessage);
