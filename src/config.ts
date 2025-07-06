@@ -11,6 +11,11 @@ type APIConfig = {
     secret: string;
     defaultExpireTime: number;
   };
+  apiConfig: {
+    polka: {
+      webhookSecret: string;
+    };
+  };
 };
 
 type DBConfig = {
@@ -32,6 +37,11 @@ export const appState: APIConfig = {
   jwt: {
     secret: envOrThrow("JWT_SECRET"),
     defaultExpireTime: 60 * 60,
+  },
+  apiConfig: {
+    polka: {
+      webhookSecret: envOrThrow("POLKA_API_KEY"),
+    },
   },
 };
 

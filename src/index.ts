@@ -6,7 +6,7 @@ import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { appState } from "./config.js";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { handlerAddUser, handlerLoginUser, handlerUpdateUsers } from "./api/users.js";
+import { handlerAddUser, handlerLoginUser, handlerUpdateUsers, handlerUpdateUserChirpyRed } from "./api/users.js";
 import { handlerNewChirp, handlerGetChirps, handlerGetChirp, handlerDeleteChirp } from "./api/chirps.js";
 import { handlerRefreshAccessToken, handlerRevokeRefreshToken } from "./api/auth.js";
 
@@ -62,6 +62,11 @@ app.post("/api/refresh", (req,res, next) => {
 });
 app.post("/api/revoke", (req,res, next) => {
   Promise.resolve(handlerRevokeRefreshToken(req, res)).catch(next);
+});
+
+// Weebhooks
+app.post("/api/polka/webhooks", (req,res, next) => {
+  Promise.resolve(handlerUpdateUserChirpyRed(req, res)).catch(next);
 });
 
 // Errors

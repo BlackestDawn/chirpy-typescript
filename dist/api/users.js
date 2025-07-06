@@ -1,7 +1,7 @@
 import { respondWithJSON } from "./json.js";
-import { createUser, getUserByEmail, getUserByUUID, updateUser } from "../db/queries/users.js";
+import { createUser, getUserByEmail, getUserByUUID, updateUser, updateUserToChirpyRed } from "../db/queries/users.js";
 import * as errors from "./errors.js";
-import { hashPassword, checkPasswordHash, makeJWT, makeRefreshToken, validateJWT, getBearerToken } from "../lib/auth.js";
+import { hashPassword, checkPasswordHash, makeJWT, makeRefreshToken, validateJWT, getBearerToken, getAPIKey } from "../lib/auth.js";
 import { appState } from "../config.js";
 import { addRefreshToken } from "../db/queries/auth.js";
 export async function handlerAddUser(req, res) {
@@ -9,29 +9,31 @@ export async function handlerAddUser(req, res) {
     if (!email || !password) {
         throw new errors.BadRequestError("no email or password found");
     }
-    const createdUser = await createUser({
+    const { hashedPassword, ...createdUser } = await createUser({
         email: email,
         hashedPassword: await hashPassword(password),
     });
     respondWithJSON(res, 201, createdUser);
 }
 export async function handlerLoginUser(req, res) {
-    const response = {
-        ...req.body,
-        token: "",
-        refreshToken: "",
-    };
-    if (!response.email || !response.password) {
+    const { email, password } = req.body;
+    if (!email || !password) {
         throw new errors.UnauthorizedError("invalid username or password");
     }
-    const user = await getUserByEmail(response.email);
+    const user = await getUserByEmail(email);
     if (!user) {
         throw new errors.UnauthorizedError("invalid username or password");
     }
-    response.id = user.id;
-    response.createdAt = user.createdAt;
-    response.updatedAt = user.updatedAt;
-    if (!checkPasswordHash(response.password, user.hashedPassword)) {
+    const response = {
+        token: "",
+        refreshToken: "",
+        email: email,
+        id: user.id,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        isChirpyRed: user.isChirpyRed,
+    };
+    if (!checkPasswordHash(password, user.hashedPassword)) {
         throw new errors.UnauthorizedError("invalid username or password");
     }
     response.refreshToken = await makeRefreshToken();
@@ -56,4 +58,20 @@ export async function handlerUpdateUsers(req, res) {
         hashedPassword: newPassword,
     });
     respondWithJSON(res, 200, updatedUser);
+}
+export async function handlerUpdateUserChirpyRed(req, res) {
+    const apiKey = await getAPIKey(req);
+    if (apiKey !== appState.apiConfig.polka.webhookSecret) {
+        throw new errors.UnauthorizedError("invalid webhook secret");
+    }
+    const { event, data } = req.body;
+    if (event !== "user.upgraded") {
+        respondWithJSON(res, 204, "");
+        return;
+    }
+    const result = await updateUserToChirpyRed(data.userId);
+    if (!result) {
+        throw new errors.NotFoundError("user not found");
+    }
+    respondWithJSON(res, 204, "");
 }

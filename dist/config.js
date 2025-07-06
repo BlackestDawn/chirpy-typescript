@@ -13,6 +13,11 @@ export const appState = {
         secret: envOrThrow("JWT_SECRET"),
         defaultExpireTime: 60 * 60,
     },
+    apiConfig: {
+        polka: {
+            webhookSecret: envOrThrow("POLKA_API_KEY"),
+        },
+    },
 };
 function envOrThrow(key) {
     if (!process.env[key]) {
