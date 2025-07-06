@@ -1,5 +1,5 @@
 import { respondWithJSON } from "./json.js";
-import { createChirp, getAllChirps, getChirp, deleteChirp } from "../db/queries/chirps.js";
+import { createChirp, getAllChirps, getChirp, deleteChirp, getChirpsByUser } from "../db/queries/chirps.js";
 import { getUserByUUID } from "../db/queries/users.js";
 import * as errors from "./errors.js";
 import { appState } from "../config.js";
@@ -35,8 +35,23 @@ export async function handlerNewChirp(req, res) {
     respondWithJSON(res, 201, createdChirp);
 }
 export async function handlerGetChirps(req, res) {
-    const chirps = await getAllChirps();
-    respondWithJSON(res, 200, chirps);
+    const authorIdQuery = req.query.authorId;
+    const sortQuery = req.query.sort;
+    const authorId = authorIdQuery ? String(authorIdQuery) : undefined;
+    const sort = sortQuery ? String(sortQuery) : "asc";
+    let result;
+    if (authorId) {
+        result = await getChirpsByUser(authorId);
+    }
+    else {
+        result = await getAllChirps();
+    }
+    respondWithJSON(res, 200, result.sort((a, b) => {
+        if (sort === "asc") {
+            return a.createdAt.getTime() - b.createdAt.getTime();
+        }
+        return b.createdAt.getTime() - a.createdAt.getTime();
+    }));
 }
 export async function handlerGetChirp(req, res) {
     const chirp = await getChirp(req.params.chirpID);

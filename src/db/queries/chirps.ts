@@ -28,3 +28,9 @@ export async function deleteChirp(id: string) {
     .returning();
   return result;
 }
+
+export async function getChirpsByUser(id: string) {
+  return await db.query.chirps.findMany({
+    where: (chirps, { eq }) => eq(chirps.userId, id),
+  });
+}

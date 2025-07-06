@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { respondWithJSON } from "./json.js";
-import { createChirp, getAllChirps, getChirp, deleteChirp } from "../db/queries/chirps.js";
+import { createChirp, getAllChirps, getChirp, deleteChirp, getChirpsByUser } from "../db/queries/chirps.js";
 import { getUserByUUID } from "../db/queries/users.js";
 import { NewChirp, Chirp } from "../db/schema.js";
 import  * as errors from "./errors.js";
@@ -52,9 +52,24 @@ export async function handlerNewChirp(req: Request, res: Response) {
 }
 
 export async function handlerGetChirps(req: Request, res: Response) {
-  const chirps = await getAllChirps();
+  const authorIdQuery = req.query.authorId;
+  const sortQuery = req.query.sort;
+  const authorId = authorIdQuery ? String(authorIdQuery) : undefined;
+  const sort = sortQuery ? String(sortQuery) : "asc";
 
-  respondWithJSON(res, 200, chirps);
+  let result: Chirp[];
+
+  if (authorId) {
+    result = await getChirpsByUser(authorId);
+  } else {
+    result = await getAllChirps();
+  }
+  respondWithJSON(res, 200, result.sort((a, b) => {
+    if (sort === "asc") {
+      return a.createdAt.getTime() - b.createdAt.getTime();
+    }
+    return b.createdAt.getTime() - a.createdAt.getTime();
+  }));
 }
 
 export async function handlerGetChirp(req: Request, res: Response) {
